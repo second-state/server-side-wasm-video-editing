@@ -34,8 +34,12 @@ fn list_of_paths(root: &str) -> io::Result<i32> {
             height = dim.1;
             dim_set = true;
         }
-        //println!("Width: {:?}", width);
-        //println!("Height: {:?}", height);
+
+        // This part is where we will implement the SecondState server-side Wasm VM
+        // We will have a new thread for each of these image files (entry in fs::read_dir)
+        // We will pass the enture array of pixels to SSVM; each array as a separate Rust thread
+        // If SSVM can process each array in a second or two then this whole process will be performed in mere seconds
+        // At present using Rust and CPU in this fashion the whole process takes about 50 seconds for a 10 second video (25 fps)
         for h in 0..height {
             for w in 0..width {
                 //println!("Processing width: {:?} and height: {:?}", w, h);
