@@ -43,6 +43,11 @@ http.createServer(function(req, res) {
                 res.write(p_data);
                 res.end();
             });
+            // This timeout section is not really needed if just writing a copy of unedited vodeo to disk
+            // This proves that the bottle neck is not disk io but the intense frame-by-frame, pixel-by-pixel CPU computation
+            // For example one image with 300px by 200px with 3 values (RGB) will require 180, 000 separate calculations
+            // 300px x 200px = 60,000px 
+            // Each pixel has 3 values (Red, Green, Blue) which results in 180, 000 values to evaluate
           }, 50000);
         });
 
