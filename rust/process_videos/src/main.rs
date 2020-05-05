@@ -34,20 +34,14 @@ fn list_of_paths(root: String) -> io::Result<i32> {
     let mut height: u32 = 0;
 
     // Multithreading
-    //let handle = thread::spawn(move || {
     let pool = ThreadPool::new(num_cpus::get());
-    let (tx, rx) = channel();
-    let tx = tx.clone();
+    println!("System has {:?} CPUs.", num_cpus::get());
     pool.execute(move || {
     for entry in fs::read_dir(root).expect("asdf") {
-
-        println!("Spawned thread");
-        //println!("Processing a single image");
         let entry = entry.expect("asdf");
         let img = image::open(entry.path()).unwrap();
         if dim_set == false {
             let dim = img.dimensions();
-            //println!("Width data type: {:?}", type_of(dim.0));
             width = dim.0;
             height = dim.1;
             dim_set = true;
