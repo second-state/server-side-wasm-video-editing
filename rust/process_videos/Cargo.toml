@@ -9,6 +9,10 @@ edition = "2018"
 [dependencies]
 notify = "~4.0"
 image = "~0.23"
+num_cpus = "1.13.0"
+threadpool = "1.8.0"
+
+
 
 
 

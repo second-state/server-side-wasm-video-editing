@@ -1,4 +1,6 @@
 extern crate notify;
+extern crate num_cpus;
+extern crate threadpool;
 use notify::{watcher, DebouncedEvent, RawEvent, RecursiveMode, Watcher};
 use std::ffi::OsStr;
 use std::fs;
@@ -6,6 +8,10 @@ use std::path::Path;
 use std::process::{Command, Stdio};
 use std::sync::mpsc::channel;
 use std::time::{Duration, SystemTime};
+// Multithreading
+use std::thread;
+
+use threadpool::ThreadPool;
 
 use std::{io, path::PathBuf};
 
@@ -15,17 +21,25 @@ extern crate image;
 
 use image::GenericImageView;
 
+
 fn type_of<T>(_: T) -> &'static str {
     type_name::<T>()
 }
 
-fn list_of_paths(root: &str) -> io::Result<i32> {
+fn list_of_paths(root: String) -> io::Result<i32> {
+
+
     let mut dim_set: bool = false;
     let mut width: u32 = 0;
     let mut height: u32 = 0;
-    for entry in fs::read_dir(root)? {
+
+    // Multithreading
+    let handle = thread::spawn(move || {
+    for entry in fs::read_dir(root).expect("asdf") {
+
+        println!("Spawned thread");
         //println!("Processing a single image");
-        let entry = entry?;
+        let entry = entry.expect("asdf");
         let img = image::open(entry.path()).unwrap();
         if dim_set == false {
             let dim = img.dimensions();
@@ -59,6 +73,8 @@ fn list_of_paths(root: &str) -> io::Result<i32> {
         println!("Saving image");
         img.save(entry.path()).unwrap();
     }
+    });
+    handle.join().unwrap();
     Ok(1)
 }
 
@@ -103,6 +119,7 @@ fn main() {
                     .join(time_as_string)
                     .join("frame%04d.png");
                 let clone_path_to_processing_images = path_to_processing_images.clone();
+                let var_for_fun: String = clone_path_to_processing_images.parent().unwrap().as_os_str().to_str().unwrap().to_string();
                 let clone_path_to_processing_images_2 = path_to_processing_images.clone();
                 let clone_path_to_processing_images_3 = path_to_processing_images.clone();
                 fs::create_dir(path_to_processing_images.parent().unwrap());
@@ -113,14 +130,7 @@ fn main() {
                     .arg(path_to_processing_images)
                     .output();
                 //list_of_csv_paths(clone_path_to_processing_images.parent().unwrap().as_os_str().to_str().unwrap());
-                list_of_paths(
-                    clone_path_to_processing_images
-                        .parent()
-                        .unwrap()
-                        .as_os_str()
-                        .to_str()
-                        .unwrap(),
-                );
+                list_of_paths(var_for_fun);
                 let file_stem = path_to_original_video.file_stem();
                 let extension = path_to_original_video.extension();
                 let old_stem = file_stem.clone();
