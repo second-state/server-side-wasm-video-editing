@@ -34,7 +34,11 @@ fn list_of_paths(root: String) -> io::Result<i32> {
     let mut height: u32 = 0;
 
     // Multithreading
-    let handle = thread::spawn(move || {
+    //let handle = thread::spawn(move || {
+    let pool = ThreadPool::new(num_cpus::get());
+    let (tx, rx) = channel();
+    let tx = tx.clone();
+    pool.execute(move || {
     for entry in fs::read_dir(root).expect("asdf") {
 
         println!("Spawned thread");
@@ -74,7 +78,7 @@ fn list_of_paths(root: String) -> io::Result<i32> {
         img.save(entry.path()).unwrap();
     }
     });
-    handle.join().unwrap();
+    //handle.join().unwrap();
     Ok(1)
 }
 
